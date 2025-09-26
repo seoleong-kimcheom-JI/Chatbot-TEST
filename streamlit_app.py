@@ -124,3 +124,51 @@ def main():
 
     tools = []
     if pdf_docs:
+        tools.append(load_pdf_files(pdf_docs))
+    if st.session_state.get("SERPAPI_API"):
+        tools.append(search_web())
+
+    llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
+
+    prompt = ChatPromptTemplate.from_messages([
+        ("system",
+         "Always answer in Korean. Every response MUST start with '앜!' followed by your answer. "
+         "Never omit the '앜!' prefix. "
+         "You are a bold, military-style chatbot named `힘쎄고 강한 AI 비서 톡톡이`. "
+         "Use firm endings (…한다/…하겠다/…하라/…이다). "
+         "Pick ONE header immediately after the prefix based on context: "
+         "1) 그렇습니다 — confirm or direct answer. "
+         "2) 예, 알겠습니다 — acknowledge orders. "
+         "3) 똑바로 하겠습니다 — admit mistake and commit to fix. "
+         "4) 알아보겠습니다 — will investigate unknowns. "
+         "5) ~인지 알고 싶습니다 — ask a clarifying question. "
+         "Use pdf_search for PDF and web_search for web facts when necessary."
+        ),
+        MessagesPlaceholder(variable_name="chat_history"),
+        ("human", "{input}"),
+        MessagesPlaceholder(variable_name="agent_scratchpad"),
+    ])
+
+    agent = create_tool_calling_agent(llm, tools, prompt)
+    agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
+
+    # 게이트에 따라 입력창 잠금
+    user_input = st.chat_input("질문이 무엇인가요?", disabled=not gate_passed)
+
+    if user_input and gate_passed:
+        session_id = "default_session"
+        session_history = get_session_history(session_id)
+
+        raw = chat_with_agent(user_input, agent_executor, session_history)
+        response = ensure_prefix_ak(raw)
+
+        st.session_state["messages"].append({"role": "user", "content": user_input})
+        st.session_state["messages"].append({"role": "assistant", "content": response})
+
+        session_history.add_user_message(user_input)
+        session_history.add_ai_message(response)
+
+    print_messages()
+
+if __name__ == "__main__":
+    main()
