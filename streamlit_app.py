@@ -115,8 +115,8 @@ def render_bongo_animation():
 def marine_gate_ui():
     st.subheader("사전 확인")
     choice = st.radio(
-        "오도 해병입니까?",
-        options=["예, 오도 해병이다", "아니다"],
+        "해병입니까?",
+        options=["예, 해병이다", "아니다"],
         horizontal=True,
         key="marine_choice",
     )
@@ -126,11 +126,11 @@ def marine_gate_ui():
 
     if choice == "아니다":
         st.info("해병대에 입대하겠습니까? 아래 박스를 체크해야 진행 가능하다.")
-        agreed = st.checkbox("네, 입대하겠습니다.", key="agree_enlist")
+        agreed = st.checkbox("앜!, 입대하겠습니다.", key="agree_enlist")
         if agreed and not st.session_state["van_played"]:
             render_bongo_animation()
             st.session_state["van_played"] = True
-            st.success("입대 확인. 질문 가능하다.")
+            st.success("입대 확인. 해병대에 온걸 환영한다 아쎄이.")
         return agreed
     return True
 
