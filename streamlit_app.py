@@ -115,8 +115,8 @@ def render_bongo_animation():
 def marine_gate_ui():
     st.subheader("사전 확인")
     choice = st.radio(
-        "해병입니까?",
-        options=["예, 해병이다", "아니다"],
+        "씩씩하십니까?",
+        options=["예, 씩씩하다", "아니다"],
         horizontal=True,
         key="marine_choice",
     )
